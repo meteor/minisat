@@ -60,7 +60,7 @@ SOMINOR=1
 SORELEASE?=.0#   Declare empty to leave out from library file name.
 
 MINISAT_CXXFLAGS = -I. -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS -Wall -Wno-parentheses -Wextra
-MINISAT_LDFLAGS  = -Wall -lz
+MINISAT_LDFLAGS  = -Wall
 
 ECHO=@echo
 ifeq ($(VERB),)
