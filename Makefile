@@ -154,7 +154,7 @@ $(BUILD_DIR)/release/bin/$(MINISAT_CORE) $(BUILD_DIR)/debug/bin/$(MINISAT_CORE) 
 %/lib/$(MINISAT_SLIB):
 	$(ECHO) Linking Static Library: $@
 	$(VERB) mkdir -p $(dir $@)
-	$(VERB) $(AR) -rcs $@ $^
+	$(VERB) $(AR) rcs $@ $^
 
 ## Shared Library rule
 $(BUILD_DIR)/dynamic/lib/$(MINISAT_DLIB).$(SOMAJOR).$(SOMINOR)$(SORELEASE)\

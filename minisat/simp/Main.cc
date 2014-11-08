@@ -19,7 +19,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 **************************************************************************************************/
 
 #include <errno.h>
-#include <zlib.h>
 
 #include "minisat/utils/System.h"
 #include "minisat/utils/ParseUtils.h"
@@ -88,7 +87,7 @@ int main(int argc, char** argv)
         if (argc == 1)
             printf("Reading from standard input... Use '--help' for help.\n");
 
-        gzFile in = (argc == 1) ? gzdopen(0, "rb") : gzopen(argv[1], "rb");
+        FILE* in = (argc == 1) ? fopen(0, "rb") : fopen(argv[1], "rb");
         if (in == NULL)
             printf("ERROR! Could not open file: %s\n", argc == 1 ? "<stdin>" : argv[1]), exit(1);
         
@@ -97,7 +96,7 @@ int main(int argc, char** argv)
             printf("|                                                                             |\n"); }
         
         parse_DIMACS(in, S, (bool)strictp);
-        gzclose(in);
+        fclose(in);
         FILE* res = (argc >= 3) ? fopen(argv[2], "wb") : NULL;
 
         if (S.verbosity > 0){
@@ -168,4 +167,52 @@ int main(int argc, char** argv)
         printf("INDETERMINATE\n");
         exit(0);
     }
+
+}
+
+// Returns the number of digits in the given number.
+int numDigits(int number) {
+  int digits = 0;
+  for (int n = number; n > 0; n /= 10)
+    digits++;
+  return digits;
+}
+
+extern "C"{
+  const char* solve_string(char* in, int size) {
+    SimpSolver S;
+    solver = &S;
+    bool ok = parse_DIMACS_string((unsigned char*)in, size, S, false);
+    if (!ok)
+      return "";  // The error was already printed to stderr.
+
+    S.eliminate(true);
+    if (!S.okay()){
+      return "UNSAT";
+    }
+
+    lbool ret = l_Undef;
+
+    vec<Lit> dummy;
+    ret = S.solveLimited(dummy);
+
+    if (ret == l_True) {
+      // Compute the size needed for the output string.
+      int size = 3;
+      for (int i = 0; i < S.nVars(); i++)
+        if (S.model[i] != l_Undef)
+          size += 1 + (S.model[i] == l_True ? 0 : 1) + numDigits(i+1);
+      // Produce the result string.
+      char* result = new char[size + 1];
+      int pos = 0;
+      pos += snprintf(result, size + 1 - pos, "SAT");
+      for (int i = 0; i < S.nVars(); i++)
+        if (S.model[i] != l_Undef)
+          pos += snprintf(result + pos, size + 1 - pos, " %s%d", (S.model[i] == l_True) ? "" : "-", i + 1);
+      return result;
+    } else if (ret == l_False)
+      return "UNSAT";
+    else
+      return "INDET";
+  }
 }

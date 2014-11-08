@@ -24,8 +24,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <zlib.h>
-
 #include "minisat/mtl/XAlloc.h"
 
 namespace Minisat {
@@ -36,7 +34,7 @@ namespace Minisat {
 
 
 class StreamBuffer {
-    gzFile         in;
+    FILE*         in;
     unsigned char* buf;
     int            pos;
     int            size;
@@ -46,10 +44,10 @@ class StreamBuffer {
     void assureLookahead() {
         if (pos >= size) {
             pos  = 0;
-            size = gzread(in, buf, buffer_size); } }
+            size = fread(buf, sizeof(char), buffer_size, in); } }
 
 public:
-    explicit StreamBuffer(gzFile i) : in(i), pos(0), size(0){
+    explicit StreamBuffer(FILE* i) : in(i), pos(0), size(0){
         buf = (unsigned char*)xrealloc(NULL, buffer_size);
         assureLookahead();
     }
@@ -60,12 +58,26 @@ public:
     int  position    () const { return pos; }
 };
 
+class StreamBufferString {
+    unsigned char* buf;
+    int            pos;
+    int            size;
+
+public:
+    explicit StreamBufferString(unsigned char *str, int s) : buf(str), pos(0), size(s) { }
+
+    int  operator *  () const { return (pos >= size) ? EOF : buf[pos]; }
+    void operator ++ ()       { pos++; }
+    int  position    () const { return pos; }
+};
+
 
 //-------------------------------------------------------------------------------------------------
 // End-of-file detection functions for StreamBuffer and char*:
 
 
 static inline bool isEof(StreamBuffer& in) { return *in == EOF;  }
+static inline bool isEof(StreamBufferString& in) { return *in == EOF;  }
 static inline bool isEof(const char*   in) { return *in == '\0'; }
 
 //-------------------------------------------------------------------------------------------------
@@ -87,13 +99,14 @@ static void skipLine(B& in) {
 
 
 template<class B>
-static int parseInt(B& in) {
+  static int parseInt(B& in, bool& error) {
     int     val = 0;
     bool    neg = false;
     skipWhitespace(in);
     if      (*in == '-') neg = true, ++in;
     else if (*in == '+') ++in;
-    if (*in < '0' || *in > '9') fprintf(stderr, "PARSE ERROR! Unexpected char: %c\n", *in), exit(3);
+    if (*in < '0' || *in > '9') fprintf(stderr, "PARSE ERROR! Unexpected char: %c\n", *in), error = true;
+    if (error) return 0;
     while (*in >= '0' && *in <= '9')
         val = val*10 + (*in - '0'),
         ++in;
