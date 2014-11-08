@@ -105,7 +105,7 @@ template<class B>
     skipWhitespace(in);
     if      (*in == '-') neg = true, ++in;
     else if (*in == '+') ++in;
-    if (*in < '0' || *in > '9') fprintf(stderr, "PARSE ERROR! Unexpected char: %c\n", *in), error = true;
+    if (*in < '0' || *in > '9') printf("PARSE ERROR! Unexpected char: %c\n", *in), error = true;
     if (error) return 0;
     while (*in >= '0' && *in <= '9')
         val = val*10 + (*in - '0'),
