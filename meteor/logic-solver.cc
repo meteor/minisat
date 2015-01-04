@@ -55,4 +55,18 @@ extern "C" {
   bool solve() {
     return SOLVER->solve();
   }
+
+  uint8_t * getSolution() {
+    // model is a vec<lbool>, which has a cast operator
+    // that gives you a lbool* (a pointer to the data
+    // array).  lbool is a "lifted boolean" that can be
+    // true, false, or undefined (0, 1, or 2).  It's a
+    // class containing a uint8 field, but in memory it
+    // just looks like a uint8.
+    return (uint8_t *)((lbool *)SOLVER->model);
+  }
+
+  int getNumVars() {
+    return NumVars;
+  }
 };
