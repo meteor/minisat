@@ -29,6 +29,14 @@ extern "C" {
     SOLVER->eliminate(/*turn_off_elim = */true);
   }
 
+  // v is 1-based
+  void ensureVar(int v) {
+    while (v > NumVars) {
+      SOLVER->newVar();
+      NumVars++;
+    }
+  }
+  
   // terms is 0-terminated.  Negative numbers are negative
   // terms.  1, 2, and 3 mean variables 0, 1, and 2.
   // -1, -2, and -3 mean "not 0", "not 1", and "not 2".
@@ -41,12 +49,8 @@ extern "C" {
         v = -v;
         isNot = true;
       }
-      v--;
-      while (v >= NumVars) {
-        SOLVER->newVar();
-        NumVars++;
-      }
-      vars.push(mkLit(Var(v), isNot));
+      ensureVar(v);
+      vars.push(mkLit(Var(v-1), isNot));
       terms++;
     }
     return SOLVER->addClause(vars);
@@ -68,5 +72,21 @@ extern "C" {
 
   int getNumVars() {
     return NumVars;
+  }
+
+  // solve while temporarily assuming variable v is true.
+  // v is 1-based.
+  bool solveAssuming(int v) {
+    vec<Lit> assumps;
+    assumps.push(mkLit(Var(v-1)));
+    return SOLVER->solve(assumps,
+                         /*do_sump = */true,
+                         /*turn_off_simp = */false);
+  }
+  
+  // mark a Var as false, forever.
+  // v is 1-based.
+  void retireVar(int v) {
+    SOLVER->addClause(mkLit(Var(v-1), true));
   }
 };
