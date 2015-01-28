@@ -89,4 +89,17 @@ extern "C" {
   void retireVar(int v) {
     SOLVER->addClause(mkLit(Var(v-1), true));
   }
+
+  int getConflictClauseSize() {
+    return SOLVER->conflict.size();
+  }
+
+  // Returns a pointer to an int[] of length getConflictClauseSize().
+  int * getConflictClause() {
+    // conflict is an IntSet<Lit>, which we can cast
+    // to an array of int, where each int is 2*v + s where
+    // v is the zero-based variable number (the 1-based variable number
+    // minus one) and s is 1 for "not".
+    return (int *)((Lit *)*const_cast<vec<Lit> *>(&SOLVER->conflict.toVec()));
+  }
 };
