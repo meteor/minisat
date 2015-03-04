@@ -1,58 +1,25 @@
-================================================================================
-Quick Install
+## Building MiniSat with Emscripten for the Meteor logic-solver
 
-- Decide where to install the files . The simplest approach is to use
-  GNU standard locations and just set a "prefix" for the root install
-  directory (reffered to as $PREFIX below). More control can be
-  achieved by overriding other of the GNU standard install locations
-  (includedir, bindir, etc). Configuring with just a prefix:
+1. Install Emscripten.  On a Mac with Brew, `brew install emscripten` will do it.
+   (Last tested with emscripten 1.28.0.)
+2. Check that you have `emmake`, `emcc`, and `node` in your path.  If you don't
+   have `node` in your path, you can locally modify the script in the next step
+   where it says `NODE=node`.  (Node is only used to run a quick sanity check
+   after compiling.)
+2. In the repo directory, run `meteor/make-emscripten.sh`.
+3. That's it.  If everything worked, the build product is `build/minisat.js`.
 
-  > make config prefix=$PREFIX
+Notes:
 
-- Compiling and installing:
+* The "native" part of logic-solver is in `meteor/logic-solver.cc`.  If you add
+  functions to it, you need to also list them in `make-emscripten.sh`.
 
-  > make install
+* There's heap allocation instrumentation, hackily implemented, that doesn't
+  actually run unless you put the compiler in debug mode (see comment in the
+  make script about the -g flag).
 
-================================================================================
-Configuration
+* You want to leave minification on (no -g flag), because unlike
+  client-side code served by Meteor (which is minified anyway), Node
+  runs this code directly.  Minification actually helps the JS compile
+  time quite a bit!
 
-- Multiple configuration steps can be joined into one call to "make
-  config" by appending multiple variable assignments on the same line.
-
-- The configuration is stored in the file "config.mk". Look here if
-  you want to know what the current configuration looks like.
-
-- To reset from defaults simply remove the "config.mk" file or call
-  "make distclean".
-
-- Recompilation can be done without the configuration step.
-
-  [ TODO: describe configartion possibilities for compile flags / modes ]
-
-================================================================================
-Building
-
-  [ TODO: describe seperate build modes ]
-
-================================================================================
-Install
-
-  [ TODO: ? ]
-
-================================================================================
-Directory Overview:
-
-minisat/mtl/            Mini Template Library
-minisat/utils/          Generic helper code (I/O, Parsing, CPU-time, etc)
-minisat/core/           A core version of the solver
-minisat/simp/           An extended solver with simplification capabilities
-doc/                    Documentation
-README
-LICENSE
-
-================================================================================
-Examples:
-
-Run minisat with same heuristics as version 2.0:
-
-> minisat <cnf-file> -no-luby -rinc=1.5 -phase-saving=0 -rnd-freq=0.02
