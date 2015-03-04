@@ -14,6 +14,12 @@ Notes:
 * The "native" part of logic-solver is in `meteor/logic-solver.cc`.  If you add
   functions to it, you need to also list them in `make-emscripten.sh`.
 
+* We wrap the entire Emscripten output in a closure, so that we can create
+  multiple instances of the entire C environment (including the heap).
+  MiniSat's C++ classes are slightly leaky, and it doesn't seem wise to have
+  multiple solver instances sharing a heap on the "native" side.  Better to
+  fully isolate instances, and not rely on (or even call) the destructor.
+
 * There's heap allocation instrumentation, hackily implemented, that doesn't
   actually run unless you put the compiler in debug mode (see comment in the
   make script about the -g flag).
