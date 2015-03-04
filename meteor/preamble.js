@@ -1,5 +1,5 @@
 // (start of meteor/preamble.js)
-cMinisat = function () {
+C_MINISAT = function () {
   var module = {};
 // Put emscripten in "node mode" but don't give it the real `process`
 // object.  It does have access to `console`.

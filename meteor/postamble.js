@@ -54,8 +54,8 @@ setInnerFree(hookedFree);
   return module.exports;
 };
 // Just so we can also run as a node module via
-// `cMinisat = require('minisat.js')()`:
+// `C_MINISAT = require('minisat.js')()`:
 if (typeof module !== 'undefined') {
-  module.exports = cMinisat;
+  module.exports = C_MINISAT;
 }
 // (end of meteor/postamble.js)
