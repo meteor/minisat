@@ -1,4 +1,4 @@
-## Building MiniSat with Emscripten for the Meteor logic-solver
+### Building MiniSat with Emscripten for the Meteor logic-solver
 
 1. Install Emscripten.  On a Mac with Brew, `brew install emscripten` will do it.
    (Last tested with emscripten 1.28.0.)
