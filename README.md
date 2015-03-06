@@ -22,7 +22,9 @@ Notes:
 
 * There's heap allocation instrumentation, hackily implemented, that doesn't
   actually run unless you put the compiler in debug mode (see comment in the
-  make script about the -g flag).
+  make script about the -g flag).  You also need to uncomment the lines
+  starting with `/////` in `meteor/midamble.js` (which have been disabled
+  so that they don't interfere with asm.js optimization).
 
 * You want to leave minification on (no -g flag), because unlike
   client-side code served by Meteor (which is minified anyway), Node
